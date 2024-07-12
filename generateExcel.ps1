@@ -5,8 +5,8 @@
     exit
 }
 
-$dhcpServer = "VM-DC01"
-$scopeId = "192.168.50.0"
+$dhcpServer = "VM-DC01" # Your DHCP server
+$scopeId = "192.168.50.0" # Your DHCP Pool
 
 try {
     $dhcpLeases = Get-DhcpServerv4Lease -ComputerName $dhcpServer -ScopeId $scopeId -ErrorAction Stop
@@ -18,7 +18,7 @@ try {
 $data = @()
 
 for ($i = 1; $i -le 254; $i++) {
-    $ip = "192.168.50.$i"
+    $ip = "192.168.50.$i" # edit the pool here too
 
     $lease = $dhcpLeases | Where-Object { $_.IPAddress -eq $ip }
 
@@ -41,7 +41,7 @@ for ($i = 1; $i -le 254; $i++) {
     }
 }
 
-$excelFilePath = "\\192.168.50.227\Public\INFORMATIQUE\InventaireMachine.xlsx"
+$excelFilePath = "\Path\to\file.xlsx" # your excel file path
 $excelPackage = Open-ExcelPackage -Path $excelFilePath
 
 $worksheet = $excelPackage.Workbook.Worksheets["VLAN1"]
@@ -78,16 +78,4 @@ if (-not $worksheet2) {
     $worksheet = $excelPackage.Workbook.Worksheets.Add("Switch")
 }
 
-
-$sourceFilePath = "\\192.168.50.227\Public\INFORMATIQUE\InventaireEquipement.xlsx"
-$sourceWork = Open-ExcelPackage -Path $sourceFilePath
-
-foreach ($sourceWorksheet in $sourceWork.Workbook.Worksheets) {
-    $destinationWorksheet = $excelPackage.Workbook.Worksheets.Add($sourceWorksheet.Name)
-    $destinationWorksheet.Cells[$sourceWorksheet.Dimension.Address].Value = $sourceWorksheet.Cells[$sourceWorksheet.Dimension.Address].Value
-}
-
-
-# Fermeture des fichiers
-Close-ExcelPackage -ExcelPackage $sourceWork -NoSave
 Close-ExcelPackage -ExcelPackage $excelPackage
